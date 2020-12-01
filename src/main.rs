@@ -4,12 +4,22 @@ mod days;
 use std::env;
 
 use days::run_day;
+use days::run_all_days;
 
 fn main() {
-    let day = env::args()
-        .nth(1)
-        .unwrap_or_else(|| String::from("1"))
-        .parse()
-        .unwrap_or(1);
-    run_day(day);
+    let day_arg = env::args().nth(1);
+    if let Some(day) = day_arg {
+        if day == "all" {
+            run_all_days();
+        } else if let Ok(day_number) = day.parse() {
+            run_day(day_number);
+        } else {
+            println!("Invalid argument {}", day);
+        }
+    } else {
+        println!("Usage:\n  `{0} <day_number>` for a specific day\n  `{0} all` to run all days",
+                 env::args()
+                        .next()
+                        .unwrap_or_else(|| String::from("advent_of_code")));
+    }
 }

@@ -1,6 +1,8 @@
 use std::fmt::Display;
 use std::fs::File;
 use std::io::Read;
+use std::io::Error;
+use std::time::SystemTime;
 
 pub trait Day {
     type Input;
@@ -13,30 +15,52 @@ pub trait Day {
 
     fn solve(&self, day_number: usize) {
         let test_input_unparsed = self.read_test_input(day_number);
-        let test_input = self.parse_input(test_input_unparsed);
         let input_unparsed = self.read_input(day_number);
-        let input = self.parse_input(input_unparsed);
 
-        println!("---TEST INPUT---");
-        println!("Part 1: {}", self.solve_part1(&test_input));
-        println!("Part 2: {}", self.solve_part2(&test_input));
+        if let Ok(input) = test_input_unparsed {
+            let input = self.parse_input(input);
+            println!("SAMPLE INPUT:");
+            self.solve_part1_timed(&input);
+            self.solve_part2_timed(&input);
+        } else {
+            println!("No test file found");
+        }
 
-        println!("---FULL INPUT---");
-        println!("Part 1: {}", self.solve_part1(&input));
-        println!("Part 2: {}", self.solve_part2(&input));
+        if let Ok(input) = input_unparsed {
+            let input = self.parse_input(input);
+            println!("FULL INPUT:");
+            self.solve_part1_timed(&input);
+            self.solve_part2_timed(&input);
+        } else {
+            println!("No input file found");
+        }
     }
 
-    fn read_input(&self, day_number: usize) -> String {
-        let mut ret = String::new();
-        let mut f = File::open(format!("input/day{}", day_number)).expect("Could not open file");
-        f.read_to_string(&mut ret).expect("Could not parse file");
-        ret
+    fn solve_part1_timed(&self, input: &Self::Input) {
+        let timer = SystemTime::now();
+        let ret = self.solve_part1(input);
+        let time_taken = timer.elapsed().unwrap();
+        println!("Part 1: {} (took {}ns)", ret, time_taken.as_nanos());
     }
 
-    fn read_test_input(&self, day_number: usize) -> String {
+    fn solve_part2_timed(&self, input: &Self::Input) {
+        let timer = SystemTime::now();
+        let ret = self.solve_part2(input);
+        let time_taken = timer.elapsed().unwrap();
+        println!("Part 2: {} (took {}ns)", ret, time_taken.as_nanos());
+    }
+
+    fn read_input(&self, day_number: usize) -> Result<String, Error> {
         let mut ret = String::new();
-        let mut f = File::open(format!("input/day{}_test", day_number)).expect("Could not open file");
-        f.read_to_string(&mut ret).expect("Could not parse file");
-        ret
+        let mut f = File::open(format!("input/day{}", day_number))?;
+        f.read_to_string(&mut ret).expect("Could not read file");
+        Ok(ret)
+    }
+
+    fn read_test_input(&self, day_number: usize) -> Result<String, Error> {
+        let mut ret = String::new();
+        let mut f = File::open(format!("input/sample_day{}", day_number))?;
+        f.read_to_string(&mut ret).expect("Could not read file");
+        Ok(ret)
     }
 }
