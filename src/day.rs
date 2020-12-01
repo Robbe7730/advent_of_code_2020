@@ -4,6 +4,8 @@ use std::io::Read;
 use std::io::Error;
 use std::time::SystemTime;
 
+use std::convert::TryInto;
+
 pub trait Day {
     type Input;
     type Output1: Display;
@@ -36,6 +38,18 @@ pub trait Day {
         }
     }
 
+    fn bench(&self, bench_num: usize, day_number: usize) {
+        let input_unparsed = self.read_input(day_number);
+        if let Ok(input) = input_unparsed {
+            let input = self.parse_input(input);
+            println!("BENCHMARK");
+            self.bench_part1(&input, bench_num.try_into().expect(""));
+            self.bench_part2(&input, bench_num.try_into().expect(""));
+        } else {
+            println!("No input file found");
+        }
+    }
+
     fn solve_part1_timed(&self, input: &Self::Input) {
         let timer = SystemTime::now();
         let ret = self.solve_part1(input);
@@ -48,6 +62,26 @@ pub trait Day {
         let ret = self.solve_part2(input);
         let time_taken = timer.elapsed().unwrap();
         println!("Part 2: {} (took {}ns)", ret, time_taken.as_nanos());
+    }
+
+    fn bench_part1(&self, input: &Self::Input, n: u32) {
+        let timer = SystemTime::now();
+        for _ in 0..n {
+            self.solve_part1(input);
+        }
+        let time_taken = timer.elapsed().unwrap();
+        let avg_time = (time_taken / n).as_nanos();
+        println!("Part 1 averaged {}ns over {} iterations", avg_time, n);
+    }
+
+    fn bench_part2(&self, input: &Self::Input, n: u32) {
+        let timer = SystemTime::now();
+        for _ in 0..n {
+            self.solve_part2(input);
+        }
+        let time_taken = timer.elapsed().unwrap();
+        let avg_time = (time_taken / n).as_nanos();
+        println!("Part 2 averaged {}ns over {} iterations", avg_time, n);
     }
 
     fn read_input(&self, day_number: usize) -> Result<String, Error> {

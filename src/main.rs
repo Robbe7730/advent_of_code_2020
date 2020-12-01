@@ -1,27 +1,28 @@
 mod day;
 mod days;
 
-extern crate itertools;
-
-use std::env;
+use structopt::StructOpt;
 
 use days::run_day;
 use days::run_all_days;
 
+#[derive(StructOpt, Debug)]
+struct Cli {
+    #[structopt(short, long, help = "Run all days until day_num")]
+    all: bool,
+
+    #[structopt(short, long, default_value = "0")]
+    bench_num: usize,
+
+    day_num: usize,
+}
+
 fn main() {
-    let day_arg = env::args().nth(1);
-    if let Some(day) = day_arg {
-        if day == "all" {
-            run_all_days();
-        } else if let Ok(day_number) = day.parse() {
-            run_day(day_number);
-        } else {
-            println!("Invalid argument {}", day);
-        }
-    } else {
-        println!("Usage:\n  `{0} <day_number>` for a specific day\n  `{0} all` to run all days",
-                 env::args()
-                        .next()
-                        .unwrap_or_else(|| String::from("advent_of_code")));
+    let args = Cli::from_args();
+    
+    if args.all {
+        run_all_days(args.day_num, args.bench_num);
+    } else  {
+        run_day(args.day_num, args.bench_num);
     }
 }
