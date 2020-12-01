@@ -1,6 +1,8 @@
 mod day;
 mod days;
 
+extern crate itertools;
+
 use std::env;
 
 use days::run_day;
