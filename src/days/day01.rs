@@ -19,8 +19,7 @@ impl Day for Day01 {
     }
 
     fn solve_part2(&self, input: &Self::Input) -> Self::Output2 {
-        // max_allowed_value = 2020 - input.into_iter().min().expect("No values");
-        let max_allowed_value = 2020;
+        let max_allowed_value = 2020 - input.into_iter().min().expect("No values");
         iproduct!(
             iproduct!(input, input)
                 .filter(|tup| tup.0 + tup.1 <= max_allowed_value),
