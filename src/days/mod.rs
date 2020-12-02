@@ -1,18 +1,14 @@
 mod day01;
+mod day02;
 
 use crate::day::Day;
 
 pub fn run_day(day_num: usize, bench_num: usize) {
-    let day = match day_num {
-        1 => day01::Day01{},
+    match day_num {
+        1 => day01::Day01{}.execute(day_num, bench_num),
+        2 => day02::Day02{}.execute(day_num, bench_num),
         _ => panic!("Day {} hasn't been solved (yet)", day_num),
     };
-
-    day.solve(day_num);
-
-    if bench_num > 0 {
-        day.bench(bench_num, day_num);
-    }
 }
 
 pub fn run_all_days(day_num: usize, bench_num: usize) {

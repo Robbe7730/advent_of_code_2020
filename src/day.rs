@@ -15,6 +15,15 @@ pub trait Day {
     fn solve_part1(&self, input: &Self::Input) -> Self::Output1;
     fn solve_part2(&self, input: &Self::Input) -> Self::Output2;
 
+    fn execute(&self, day_num: usize, bench_num: usize) {
+        self.solve(day_num);
+
+        if bench_num > 0 {
+           self.bench(bench_num, day_num);
+        }
+
+    }
+
     fn solve(&self, day_number: usize) {
         let test_input_unparsed = self.read_test_input(day_number);
         let input_unparsed = self.read_input(day_number);
