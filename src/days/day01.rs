@@ -6,11 +6,11 @@ use itertools::iproduct;
 pub struct Day01 {}
 
 impl Day for Day01 {
-    type Input = Vec<usize>;
+    type InputElement = usize;
     type Output1 = usize;
     type Output2 = usize;
 
-    fn solve_part1(&self, input: &Self::Input) -> Self::Output1 {
+    fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1 {
         iproduct!(input, input)
             .filter(|tup| tup.0 + tup.1 == 2020)
             .map(|tup| tup.0 * tup.1)
@@ -18,7 +18,7 @@ impl Day for Day01 {
             .expect("No result")
     }
 
-    fn solve_part2(&self, input: &Self::Input) -> Self::Output2 {
+    fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
         let max_allowed_value = 2020 - input.into_iter().min().expect("No values");
         iproduct!(
             iproduct!(input, input)
@@ -30,7 +30,7 @@ impl Day for Day01 {
             .expect("No result")
     }
 
-    fn parse_input(&self, content: String) -> Self::Input {
+    fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
         content.lines().map(|x| x.parse::<usize>().expect("Invalid input")).collect()
     }
 }
