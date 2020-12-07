@@ -3,8 +3,9 @@ use std::fs::File;
 use std::io::Read;
 use std::io::Error;
 use std::time::SystemTime;
-
 use std::convert::TryInto;
+use std::path::PathBuf;
+
 use rand::seq::SliceRandom;
 
 pub trait Day {
@@ -16,40 +17,45 @@ pub trait Day {
     fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1;
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2;
 
-    fn execute(&self, day_num: usize, bench_num: usize) {
-        self.solve(day_num);
-
-        if bench_num > 0 {
-           self.bench(bench_num, day_num);
-        }
-
-    }
-
-    fn solve(&self, day_number: usize) {
-        let test_input_unparsed = self.read_test_input(day_number);
-        let input_unparsed = self.read_input(day_number);
-
-        if let Ok(input) = test_input_unparsed {
-            let input = self.parse_input(input);
-            println!("SAMPLE INPUT:");
-            self.solve_part1_timed(&input);
-            self.solve_part2_timed(&input);
-        } else {
-            println!("No test file found");
-        }
+    fn execute(&self, day_num: usize, bench_num: usize, run_part1: bool, run_part2: bool, input_file: Option<PathBuf>, timed: bool) {
+        let filename = match input_file {
+            None => format!("input/day{}", day_num),
+            Some(p) => p.into_os_string().into_string().expect("Invalid file path"),
+        };
+        let input_unparsed = self.read_input(&filename);
 
         if let Ok(input) = input_unparsed {
             let input = self.parse_input(input);
-            println!("FULL INPUT:");
-            self.solve_part1_timed(&input);
-            self.solve_part2_timed(&input);
+            if run_part1 {
+                if timed {
+                    let (sol, time) = self.solve_part1_timed(&input);
+                    println!("Part 1: {} (took {}ns)", sol, time);
+                } else {
+                    let sol = self.solve_part1(&input);
+                    println!("Part 1: {}", sol);
+                }
+            }
+            if run_part2 {
+                if timed {
+                    let (sol, time) = self.solve_part2_timed(&input);
+                    println!("Part 2: {} (took {}ns)", sol, time);
+                } else {
+                    let sol = self.solve_part2(&input);
+                    println!("Part 2: {}", sol);
+                }
+            }
         } else {
             println!("No input file found");
         }
+
+        if bench_num > 0 {
+           self.bench(bench_num, &filename);
+        }
+
     }
 
-    fn bench(&self, bench_num: usize, day_number: usize) {
-        let input_unparsed = self.read_input(day_number);
+    fn bench(&self, bench_num: usize, input_filename: &String) {
+        let input_unparsed = self.read_input(input_filename);
         if let Ok(input) = input_unparsed {
             let mut input = self.parse_input(input);
             println!("BENCHMARK");
@@ -63,18 +69,18 @@ pub trait Day {
         }
     }
 
-    fn solve_part1_timed(&self, input: &Vec<Self::InputElement>) {
+    fn solve_part1_timed(&self, input: &Vec<Self::InputElement>) -> (Self::Output1, u128) {
         let timer = SystemTime::now();
         let ret = self.solve_part1(input);
         let time_taken = timer.elapsed().unwrap();
-        println!("Part 1: {} (took {}ns)", ret, time_taken.as_nanos());
+        (ret, time_taken.as_nanos())
     }
 
-    fn solve_part2_timed(&self, input: &Vec<Self::InputElement>) {
+    fn solve_part2_timed(&self, input: &Vec<Self::InputElement>) -> (Self::Output2, u128) {
         let timer = SystemTime::now();
         let ret = self.solve_part2(input);
         let time_taken = timer.elapsed().unwrap();
-        println!("Part 2: {} (took {}ns)", ret, time_taken.as_nanos());
+        (ret, time_taken.as_nanos())
     }
 
     fn bench_part1(&self, input: &Vec<Self::InputElement>, n: u32) {
@@ -125,9 +131,9 @@ pub trait Day {
         println!("Part 2 averaged {}ns over {} iterations", avg_time, n);
     }
 
-    fn read_input(&self, day_number: usize) -> Result<String, Error> {
+    fn read_input(&self, filename: &String) -> Result<String, Error> {
         let mut ret = String::new();
-        let mut f = File::open(format!("input/day{}", day_number))?;
+        let mut f = File::open(filename)?;
         f.read_to_string(&mut ret).expect("Could not read file");
         Ok(ret)
     }
