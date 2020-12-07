@@ -4,6 +4,7 @@ mod day03;
 mod day04;
 mod day05;
 mod day06;
+mod day07;
 
 use crate::day::Day;
 
@@ -15,6 +16,7 @@ pub fn run_day(day_num: usize, bench_num: usize) {
         4 => day04::Day04{}.execute(day_num, bench_num),
         5 => day05::Day05{}.execute(day_num, bench_num),
         6 => day06::Day06{}.execute(day_num, bench_num),
+        7 => day07::Day07{}.execute(day_num, bench_num),
         _ => panic!("Day {} hasn't been solved (yet)", day_num),
     };
 }
