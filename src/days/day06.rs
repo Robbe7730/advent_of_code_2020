@@ -23,35 +23,21 @@ pub struct Day06 {}
 
 impl Day for Day06 {
     type InputElement = Vec<Answer>;
-    type Output1 = usize;
-    type Output2 = usize;
+    type Output1 = u32;
+    type Output2 = u32;
 
     fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1 {
         input.iter()
               .map(|group|
                    group.iter().fold(0, |a,x| a | x.bitmap)
-              ).map(|x1| {
-                    // https://en.wikipedia.org/wiki/Hamming_weight
-                    let mut x = x1;
-                    x -= (x1 >> 1) & 0x55555555;
-                    x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
-                    x = (x + (x >> 4)) & 0x0f0f0f0f;
-                    ((x.wrapping_mul(0x01010101)) >> 24) as usize
-              }).sum()
+              ).map(|x1| {x1.count_ones()}).sum()
     }
 
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
         input.iter()
               .map(|group|
                    group.iter().fold(0x7ffffff, |a,x| a & x.bitmap)
-              ).map(|x1| {
-                    // https://en.wikipedia.org/wiki/Hamming_weight
-                    let mut x = x1;
-                    x -= (x1 >> 1) & 0x55555555;
-                    x = (x & 0x33333333) + ((x >> 2) & 0x33333333);
-                    x = (x + (x >> 4)) & 0x0f0f0f0f;
-                    ((x.wrapping_mul(0x01010101)) >> 24) as usize
-              }).sum()
+              ).map(|x1| {x1.count_ones()}).sum()
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
