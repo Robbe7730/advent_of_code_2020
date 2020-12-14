@@ -1,3 +1,5 @@
+#![feature(iterator_fold_self)]
+
 mod day;
 mod days;
 
