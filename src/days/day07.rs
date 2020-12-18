@@ -1,21 +1,21 @@
 use crate::day::Day;
 
-use std::collections::VecDeque;
 use std::collections::HashSet;
+use std::collections::VecDeque;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Rule {
     modifier: String,
     color: String,
-    contains: Vec<ContainingRule>
+    contains: Vec<ContainingRule>,
 }
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ContainingRule {
     modifier: String,
     color: String,
-    amount: usize
+    amount: usize,
 }
 
 impl FromStr for Rule {
@@ -28,8 +28,8 @@ impl FromStr for Rule {
             while i < line_split.len() {
                 contains.push(ContainingRule {
                     amount: line_split[i].parse()?,
-                    modifier: line_split[i+1].to_string(),
-                    color: line_split[i+2].to_string(),
+                    modifier: line_split[i + 1].to_string(),
+                    color: line_split[i + 2].to_string(),
                 });
                 i += 4
             }
@@ -37,7 +37,7 @@ impl FromStr for Rule {
         Ok(Rule {
             modifier: line_split[0].to_string(),
             color: line_split[1].to_string(),
-            contains: contains
+            contains: contains,
         })
     }
 }
@@ -47,19 +47,24 @@ impl Rule {
         self.contains
             .iter()
             .filter(|x| x.color == color.to_string() && x.modifier == modifier.to_string())
-            .next() != None
+            .next()
+            != None
     }
 
     pub fn containing_bags(&self, all_rules: &Vec<Rule>) -> usize {
         self.contains
             .iter()
-            .map(|x| x.amount * all_rules.iter()
-                                         .filter(|r| r.color == x.color && r.modifier == x.modifier)
-                                         .next()
-                                         .expect("No such bag")
-                                         .containing_bags(all_rules)
-                )
-            .sum::<usize>() + 1
+            .map(|x| {
+                x.amount
+                    * all_rules
+                        .iter()
+                        .filter(|r| r.color == x.color && r.modifier == x.modifier)
+                        .next()
+                        .expect("No such bag")
+                        .containing_bags(all_rules)
+            })
+            .sum::<usize>()
+            + 1
     }
 }
 
@@ -78,32 +83,31 @@ impl Day for Day07 {
         while !queue.is_empty() {
             let (modifier, color) = queue.pop_front().expect("Empty queue");
             visited.insert((modifier.to_string(), color.to_string()));
-            input.iter()
-                .filter(|x| !visited.contains(&(
-                                x.modifier.to_string(),
-                                x.color.to_string())
-                        ) && x.can_hold(&color, &modifier))
-                .for_each(|x| queue.push_back((
-                            x.modifier.to_string(),
-                            x.color.to_string(),
-                        ))
-                );
+            input
+                .iter()
+                .filter(|x| {
+                    !visited.contains(&(x.modifier.to_string(), x.color.to_string()))
+                        && x.can_hold(&color, &modifier)
+                })
+                .for_each(|x| queue.push_back((x.modifier.to_string(), x.color.to_string())));
         }
         visited.len() - 1
     }
 
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
-        input.iter()
+        input
+            .iter()
             .filter(|x| x.color == "gold" && x.modifier == "shiny")
             .next()
             .expect("No shiny gold bag")
-            .containing_bags(input) - 1
+            .containing_bags(input)
+            - 1
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
-        content.lines().map(|x|
-                        x.parse::<Rule>()
-                        .expect("Invalid input")
-                ).collect()
+        content
+            .lines()
+            .map(|x| x.parse::<Rule>().expect("Invalid input"))
+            .collect()
     }
 }

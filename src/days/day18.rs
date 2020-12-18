@@ -123,15 +123,19 @@ impl Day for Day18 {
     }
 
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
-        input.iter().map(|x| {
-            let (mut ret, mut looping) = x.to_part2();
-            while looping {
-                let value = ret.to_part2();
-                ret = value.0;
-                looping = value.1;
-            }
-            ret
-        }).map(|x| x.calculate()).sum()
+        input
+            .iter()
+            .map(|x| {
+                let (mut ret, mut looping) = x.to_part2();
+                while looping {
+                    let value = ret.to_part2();
+                    ret = value.0;
+                    looping = value.1;
+                }
+                ret
+            })
+            .map(|x| x.calculate())
+            .sum()
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {

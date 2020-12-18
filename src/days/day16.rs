@@ -18,7 +18,7 @@ impl Range {
 #[derive(Debug, Clone, Hash, PartialEq, Eq)]
 pub struct FieldRule {
     name: String,
-    ranges: Vec<Range>
+    ranges: Vec<Range>,
 }
 
 impl FieldRule {
@@ -31,7 +31,7 @@ impl FieldRule {
 pub struct Input {
     rules: Vec<FieldRule>,
     my_ticket: Vec<usize>,
-    nearby_tickets: Vec<Vec<usize>>
+    nearby_tickets: Vec<Vec<usize>>,
 }
 
 pub struct Day16 {}
@@ -59,15 +59,13 @@ impl Day for Day16 {
     fn solve_part2(&self, input_vec: &Vec<Self::InputElement>) -> Self::Output2 {
         let input = input_vec[0].clone();
         let ranges = input.rules.iter().map(|x| x.ranges.clone()).flatten();
-        let valid_tickets = input.nearby_tickets.iter()
-            .filter(|ticket|
-                    ticket.iter()
-                    .all(|x|
-                         ranges.clone()
-                         .any(|r| r.contains(*x))
-                        )
-                   );
-        let mut options: Vec<HashSet<&FieldRule>> = vec![HashSet::from_iter(input.rules.iter());input.my_ticket.len()];
+        let valid_tickets = input.nearby_tickets.iter().filter(|ticket| {
+            ticket
+                .iter()
+                .all(|x| ranges.clone().any(|r| r.contains(*x)))
+        });
+        let mut options: Vec<HashSet<&FieldRule>> =
+            vec![HashSet::from_iter(input.rules.iter()); input.my_ticket.len()];
 
         for (i, &value) in input.my_ticket.iter().enumerate() {
             options[i].retain(|&x| x.contains(value));
@@ -93,40 +91,60 @@ impl Day for Day16 {
             }
         }
 
-        final_mapping.iter().zip(input.my_ticket.iter())
-                            .filter(|(m,_)| m.is_some() && m.unwrap().name.starts_with("departure"))
-                            .map(|(_,x)| x)
-                            .product()
+        final_mapping
+            .iter()
+            .zip(input.my_ticket.iter())
+            .filter(|(m, _)| m.is_some() && m.unwrap().name.starts_with("departure"))
+            .map(|(_, x)| x)
+            .product()
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
         let sections: Vec<&str> = content.split("\n\n").collect();
-        
-        let rules = sections[0].lines().map(|line| {
-            let line_split: Vec<&str> = line.split(": ").collect();
-            let ranges = line_split[1].split(" or ").map(|x| {
-                let range_split: Vec<&str> = x.split("-").collect();
-                Range {
-                    start: range_split[0].parse().expect("Invalid input"),
-                    end: range_split[1].parse().expect("invalid input")
+
+        let rules = sections[0]
+            .lines()
+            .map(|line| {
+                let line_split: Vec<&str> = line.split(": ").collect();
+                let ranges = line_split[1]
+                    .split(" or ")
+                    .map(|x| {
+                        let range_split: Vec<&str> = x.split("-").collect();
+                        Range {
+                            start: range_split[0].parse().expect("Invalid input"),
+                            end: range_split[1].parse().expect("invalid input"),
+                        }
+                    })
+                    .collect();
+                FieldRule {
+                    name: line_split[0].to_string(),
+                    ranges: ranges,
                 }
-            }).collect();
-            FieldRule {
-                name: line_split[0].to_string(),
-                ranges: ranges
-            }
-        }).collect();
+            })
+            .collect();
 
-        let my_ticket = sections[1].lines().nth(1).expect("Invalid input").split(',').map(|x| x.parse().expect("Invalid input")).collect();
+        let my_ticket = sections[1]
+            .lines()
+            .nth(1)
+            .expect("Invalid input")
+            .split(',')
+            .map(|x| x.parse().expect("Invalid input"))
+            .collect();
 
-        let nearby_tickets = sections[2].lines().skip(1).map(|x| {
-            x.split(',').map(|x| x.parse().expect("Invalid input")).collect()
-        }).collect();
-        
+        let nearby_tickets = sections[2]
+            .lines()
+            .skip(1)
+            .map(|x| {
+                x.split(',')
+                    .map(|x| x.parse().expect("Invalid input"))
+                    .collect()
+            })
+            .collect();
+
         vec![Input {
             rules: rules,
             my_ticket: my_ticket,
-            nearby_tickets: nearby_tickets
+            nearby_tickets: nearby_tickets,
         }]
     }
 }

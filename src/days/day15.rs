@@ -56,6 +56,13 @@ impl Day for Day15 {
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
-        content.split(',').map(|x| x.trim().parse::<Self::InputElement>().expect("Invalid input")).collect()
+        content
+            .split(',')
+            .map(|x| {
+                x.trim()
+                    .parse::<Self::InputElement>()
+                    .expect("Invalid input")
+            })
+            .collect()
     }
 }

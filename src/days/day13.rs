@@ -29,39 +29,44 @@ impl Day for Day13 {
     type Output2 = i128;
 
     fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1 {
-        let mut input_iter = input.iter()
-                                .filter(|x| x.is_some())
-                                .map(|x| x.expect("Invalid Input"));
+        let mut input_iter = input
+            .iter()
+            .filter(|x| x.is_some())
+            .map(|x| x.expect("Invalid Input"));
         let curr_time = input_iter.next().expect("Invalid Input");
-        let (id, wait) = input_iter.map(|x| (x, x - (curr_time % x)))
-                                    .min_by_key(|x| x.1)
-                                    .expect("No results");
+        let (id, wait) = input_iter
+            .map(|x| (x, x - (curr_time % x)))
+            .min_by_key(|x| x.1)
+            .expect("No results");
         id * wait
     }
 
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
-        input.iter()
-                .skip(1)
-                .enumerate()
-                .filter(|(_, x)| x.is_some())
-                .map(|(i,x)| (i as i128, x.unwrap() as i128))
-                .map(|(i,x)| ((x - i) % x, x))
-                .fold_first(|(a, m), (b, n)| {
-                    let (_gcd, r, s) = extended_gcd(m, n);
-                    let res = (r*n*a + s*m*b) % (m*n);
-                    if res < 0 {
-                        (res + m*n, m*n)
-                    } else {
-                        (res, m*n)
-                    }
-                }).unwrap().0
+        input
+            .iter()
+            .skip(1)
+            .enumerate()
+            .filter(|(_, x)| x.is_some())
+            .map(|(i, x)| (i as i128, x.unwrap() as i128))
+            .map(|(i, x)| ((x - i) % x, x))
+            .fold_first(|(a, m), (b, n)| {
+                let (_gcd, r, s) = extended_gcd(m, n);
+                let res = (r * n * a + s * m * b) % (m * n);
+                if res < 0 {
+                    (res + m * n, m * n)
+                } else {
+                    (res, m * n)
+                }
+            })
+            .unwrap()
+            .0
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
-        content.lines().map(|x|
-                            x.split(',')
-                             .map(|e| e.parse::<usize>()
-                                        .ok())
-                        ).flatten().collect()
+        content
+            .lines()
+            .map(|x| x.split(',').map(|e| e.parse::<usize>().ok()))
+            .flatten()
+            .collect()
     }
 }

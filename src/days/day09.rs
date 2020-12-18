@@ -11,16 +11,22 @@ impl Day for Day09 {
 
     fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1 {
         let preamble_count = 25;
-        *input.windows(preamble_count + 1).map(|slice| {
-            let target: &usize = slice.last().expect("Unreachable statement");
-            (iproduct!(slice, slice)
-                .filter(move |(x, y)| x != y && *x + *y == *target)
-                .map(|(x, y)| x + y)
-                .next(), target)
-        }).filter(|(v,_)| *v == None)
-          .next()
-          .expect("No solution")
-          .1
+        *input
+            .windows(preamble_count + 1)
+            .map(|slice| {
+                let target: &usize = slice.last().expect("Unreachable statement");
+                (
+                    iproduct!(slice, slice)
+                        .filter(move |(x, y)| x != y && *x + *y == *target)
+                        .map(|(x, y)| x + y)
+                        .next(),
+                    target,
+                )
+            })
+            .filter(|(v, _)| *v == None)
+            .next()
+            .expect("No solution")
+            .1
     }
 
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
@@ -39,18 +45,18 @@ impl Day for Day09 {
                 break;
             }
         }
-        let (min, max) = &input[start..=end].iter()
-                            .fold((usize::MAX, usize::MIN),
-                                    |(c_min, c_max), val| (c_min.min(*val), c_max.max(*val)));
+        let (min, max) = &input[start..=end]
+            .iter()
+            .fold((usize::MAX, usize::MIN), |(c_min, c_max), val| {
+                (c_min.min(*val), c_max.max(*val))
+            });
         min + max
-
-        
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
-        content.lines().map(|x|
-                        x.parse::<Self::InputElement>()
-                        .expect("Invalid input")
-                ).collect()
+        content
+            .lines()
+            .map(|x| x.parse::<Self::InputElement>().expect("Invalid input"))
+            .collect()
     }
 }

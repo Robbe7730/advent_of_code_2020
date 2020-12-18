@@ -6,8 +6,8 @@ mod days;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-use days::run_day;
 use days::run_all_days;
+use days::run_day;
 
 #[derive(StructOpt, Debug)]
 struct Cli {
@@ -32,10 +32,16 @@ struct Cli {
 
 fn main() {
     let args = Cli::from_args();
-    
+
     if args.all {
         run_all_days(args.day_num, args.bench_num, args.timed);
-    } else  {
-        run_day(args.day_num, args.bench_num, args.part_num, args.inputfile, args.timed);
+    } else {
+        run_day(
+            args.day_num,
+            args.bench_num,
+            args.part_num,
+            args.inputfile,
+            args.timed,
+        );
     }
 }

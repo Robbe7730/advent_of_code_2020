@@ -1,10 +1,10 @@
+use std::convert::TryInto;
 use std::fmt::Display;
 use std::fs::File;
-use std::io::Read;
 use std::io::Error;
-use std::time::SystemTime;
-use std::convert::TryInto;
+use std::io::Read;
 use std::path::PathBuf;
+use std::time::SystemTime;
 
 use rand::seq::SliceRandom;
 
@@ -17,7 +17,15 @@ pub trait Day {
     fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1;
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2;
 
-    fn execute(&self, day_num: usize, bench_num: usize, run_part1: bool, run_part2: bool, input_file: Option<PathBuf>, timed: bool) {
+    fn execute(
+        &self,
+        day_num: usize,
+        bench_num: usize,
+        run_part1: bool,
+        run_part2: bool,
+        input_file: Option<PathBuf>,
+        timed: bool,
+    ) {
         let filename = match input_file {
             None => format!("input/day{}", day_num),
             Some(p) => p.into_os_string().into_string().expect("Invalid file path"),
@@ -49,9 +57,8 @@ pub trait Day {
         }
 
         if bench_num > 0 {
-           self.bench(bench_num, &filename);
+            self.bench(bench_num, &filename);
         }
-
     }
 
     fn bench(&self, bench_num: usize, input_filename: &String) {

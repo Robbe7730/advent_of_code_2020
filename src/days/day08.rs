@@ -8,7 +8,7 @@ use std::str::FromStr;
 pub enum AOCOperationType {
     NOP,
     ACC,
-    JMP
+    JMP,
 }
 
 impl FromStr for AOCOperationType {
@@ -18,7 +18,7 @@ impl FromStr for AOCOperationType {
             "nop" => Ok(AOCOperationType::NOP),
             "acc" => Ok(AOCOperationType::ACC),
             "jmp" => Ok(AOCOperationType::JMP),
-            _ => Err("No such instruction".to_string())
+            _ => Err("No such instruction".to_string()),
         }
     }
 }
@@ -35,7 +35,9 @@ impl FromStr for AOCOperation {
         let line_split: Vec<&str> = line.split(" ").collect();
         Ok(AOCOperation {
             operation_type: line_split[0].parse()?,
-            argument: line_split[1].parse().map_err(|x:ParseIntError| x.to_string())?
+            argument: line_split[1]
+                .parse()
+                .map_err(|x: ParseIntError| x.to_string())?,
         })
     }
 }
@@ -48,7 +50,7 @@ impl AOCState {
                 self.accumulator += operation.argument;
                 self.ip += 1;
             }
-            AOCOperationType::JMP => self.ip += operation.argument
+            AOCOperationType::JMP => self.ip += operation.argument,
         }
     }
 }
@@ -61,9 +63,9 @@ pub struct AOCState {
 
 impl AOCState {
     pub fn run(input: &Vec<AOCOperation>) -> AOCState {
-        let mut state = AOCState { 
+        let mut state = AOCState {
             accumulator: 0,
-            ip: 0
+            ip: 0,
         };
         let mut visited = HashSet::new();
         loop {
@@ -90,21 +92,24 @@ impl Iterator for NopJmpChange {
     type Item = Vec<AOCOperation>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some((index, op)) = self.input
-                                       .iter()
-                                       .enumerate()
-                                       .skip(self.last_changed)
-                                       .filter(|(_, x)|
-                                               x.operation_type == AOCOperationType::JMP ||
-                                               x.operation_type == AOCOperationType::NOP
-                                       ).next() {
+        if let Some((index, op)) = self
+            .input
+            .iter()
+            .enumerate()
+            .skip(self.last_changed)
+            .filter(|(_, x)| {
+                x.operation_type == AOCOperationType::JMP
+                    || x.operation_type == AOCOperationType::NOP
+            })
+            .next()
+        {
             let mut ret = self.input.clone();
             let new_type = match op.operation_type {
                 AOCOperationType::JMP => AOCOperationType::NOP,
                 AOCOperationType::NOP => AOCOperationType::JMP,
                 _ => panic!("Unreachable statement"),
             };
-            self.last_changed = index+1;
+            self.last_changed = index + 1;
             ret[index] = AOCOperation {
                 operation_type: new_type,
                 argument: op.argument,
@@ -138,17 +143,18 @@ impl Day for Day08 {
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
         let nop_jmp_change = NopJmpChange::new(input);
         let input_len = input.len() as isize;
-        nop_jmp_change.map(|input| AOCState::run(&input))
-                      .filter(|state| state.ip == input_len)
-                      .next()
-                      .expect("No result")
-                      .accumulator
+        nop_jmp_change
+            .map(|input| AOCState::run(&input))
+            .filter(|state| state.ip == input_len)
+            .next()
+            .expect("No result")
+            .accumulator
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
-        content.lines().map(|x|
-                        x.parse::<Self::InputElement>()
-                        .expect("Invalid input")
-                ).collect()
+        content
+            .lines()
+            .map(|x| x.parse::<Self::InputElement>().expect("Invalid input"))
+            .collect()
     }
 }

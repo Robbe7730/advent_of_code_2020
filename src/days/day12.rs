@@ -1,7 +1,7 @@
 use crate::day::Day;
 
-use std::str::FromStr;
 use std::convert::TryFrom;
+use std::str::FromStr;
 
 #[derive(Debug, PartialEq, Eq, PartialOrd, Ord, Clone)]
 pub enum Instruction {
@@ -18,9 +18,9 @@ impl Instruction {
     pub fn from_direction(direction: &Direction, amount: isize) -> Instruction {
         match direction {
             Direction::North => Instruction::North(amount),
-            Direction::East  => Instruction::East(amount),
+            Direction::East => Instruction::East(amount),
             Direction::South => Instruction::South(amount),
-            Direction::West  => Instruction::West(amount),
+            Direction::West => Instruction::West(amount),
         }
     }
 }
@@ -45,13 +45,11 @@ impl TryFrom<isize> for Direction {
             x => Err(format!("Invalid angle: {}", x)),
         }
     }
-
 }
 
 impl Direction {
     pub fn rotate(start: Direction, amount: isize) -> Direction {
-        Direction::try_from((start as isize + amount + 360) % 360)
-            .expect("Invalid Direction")
+        Direction::try_from((start as isize + amount + 360) % 360).expect("Invalid Direction")
     }
 }
 
@@ -78,7 +76,7 @@ impl FromStr for Instruction {
 pub struct ShipPosition {
     x: isize,
     y: isize,
-    direction: Direction
+    direction: Direction,
 }
 
 impl ShipPosition {
@@ -88,9 +86,9 @@ impl ShipPosition {
             Instruction::East(amount) => self.y += amount,
             Instruction::South(amount) => self.x -= amount,
             Instruction::West(amount) => self.y -= amount,
-            Instruction::Forward(amount) => self.execute_step(
-                &Instruction::from_direction(&self.direction, *amount)
-            ),
+            Instruction::Forward(amount) => {
+                self.execute_step(&Instruction::from_direction(&self.direction, *amount))
+            }
             Instruction::Left(amount) => self.rotate(-amount),
             Instruction::Right(amount) => self.rotate(*amount),
         }
@@ -106,7 +104,7 @@ pub struct WaypointShipPosition {
     waypoint_x: isize,
     waypoint_y: isize,
     ship_x: isize,
-    ship_y: isize
+    ship_y: isize,
 }
 
 impl WaypointShipPosition {
@@ -116,7 +114,7 @@ impl WaypointShipPosition {
             Instruction::East(amount) => self.waypoint_y += amount,
             Instruction::South(amount) => self.waypoint_x -= amount,
             Instruction::West(amount) => self.waypoint_y -= amount,
-            Instruction::Forward(amount) => { 
+            Instruction::Forward(amount) => {
                 self.ship_x += self.waypoint_x * amount;
                 self.ship_y += self.waypoint_y * amount;
             }
@@ -146,30 +144,40 @@ impl Day for Day12 {
     type Output2 = isize;
 
     fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1 {
-        let end_state = input.iter()
-            .fold(ShipPosition {
+        let end_state = input.iter().fold(
+            ShipPosition {
                 x: 0,
                 y: 0,
-                direction: Direction::East
-            },|mut x,s| {x.execute_step(s); x});
+                direction: Direction::East,
+            },
+            |mut x, s| {
+                x.execute_step(s);
+                x
+            },
+        );
         end_state.x.abs() + end_state.y.abs()
     }
 
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
-        let end_state = input.iter()
-            .fold(WaypointShipPosition {
+        let end_state = input.iter().fold(
+            WaypointShipPosition {
                 waypoint_x: 1,
                 waypoint_y: 10,
                 ship_x: 0,
                 ship_y: 0,
-            },|mut x,s| {x.execute_step(s); x});
+            },
+            |mut x, s| {
+                x.execute_step(s);
+                x
+            },
+        );
         end_state.ship_x.abs() + end_state.ship_y.abs()
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
-        content.lines().map(|x|
-                        x.parse::<Self::InputElement>()
-                        .expect("Invalid input")
-                ).collect()
+        content
+            .lines()
+            .map(|x| x.parse::<Self::InputElement>().expect("Invalid input"))
+            .collect()
     }
 }

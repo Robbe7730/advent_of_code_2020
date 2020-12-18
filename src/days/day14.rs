@@ -2,18 +2,18 @@ use crate::day::Day;
 
 use std::collections::HashMap;
 
-use core::str::FromStr;
 use core::num::ParseIntError;
+use core::str::FromStr;
 
 #[derive(Debug)]
 pub enum Instruction {
     Write(usize, usize), // address, value
-    Mask(usize, usize), // 0-mask, 1-mask
+    Mask(usize, usize),  // 0-mask, 1-mask
 }
 
 impl FromStr for Instruction {
     type Err = ParseIntError;
-    fn from_str(line: &str) -> Result<Self,Self::Err> {
+    fn from_str(line: &str) -> Result<Self, Self::Err> {
         let line_split: Vec<&str> = line.split(" = ").collect();
         if line_split[0] == "mask" {
             let mut zero_mask = 0;
@@ -31,7 +31,7 @@ impl FromStr for Instruction {
             Ok(Instruction::Mask(zero_mask, one_mask))
         } else {
             let n = line_split[0].len();
-            let addr = &line_split[0][4..n-1];
+            let addr = &line_split[0][4..n - 1];
             Ok(Instruction::Write(addr.parse()?, line_split[1].parse()?))
         }
     }
@@ -57,12 +57,10 @@ impl ProgramState {
             Instruction::Mask(zero_mask, one_mask) => {
                 self.zero_mask = *zero_mask;
                 self.one_mask = *one_mask;
-            },
+            }
             Instruction::Write(addr, value) => {
-                self.memory.insert(
-                    *addr,
-                    (value | self.one_mask) & !self.zero_mask
-                );
+                self.memory
+                    .insert(*addr, (value | self.one_mask) & !self.zero_mask);
             }
         }
     }
@@ -72,13 +70,10 @@ impl ProgramState {
             Instruction::Mask(zero_mask, one_mask) => {
                 self.zero_mask = *zero_mask;
                 self.one_mask = *one_mask;
-            },
+            }
             Instruction::Write(addr, value) => {
                 self.possible_addresses(*addr).iter().for_each(|a| {
-                    self.memory.insert(
-                        *a,
-                        *value
-                    );
+                    self.memory.insert(*a, *value);
                 })
             }
         }
@@ -87,7 +82,7 @@ impl ProgramState {
     fn possible_addresses(&self, old_addr: usize) -> Vec<usize> {
         let mut floating_map = !(self.one_mask | self.zero_mask) & 0xfffffffff;
         let base_addr = (old_addr | self.one_mask) & !floating_map;
-        
+
         let mut ret = vec![base_addr];
 
         let mut i = 0;
@@ -115,17 +110,24 @@ impl Day for Day14 {
 
     fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1 {
         let mut program_state = ProgramState::new();
-        input.iter().for_each(|x| program_state.execute_instruction_1(x));
+        input
+            .iter()
+            .for_each(|x| program_state.execute_instruction_1(x));
         program_state.memory.values().sum()
     }
 
     fn solve_part2(&self, input: &Vec<Self::InputElement>) -> Self::Output2 {
         let mut program_state = ProgramState::new();
-        input.iter().for_each(|x| program_state.execute_instruction_2(x));
+        input
+            .iter()
+            .for_each(|x| program_state.execute_instruction_2(x));
         program_state.memory.values().sum()
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
-        content.lines().map(|x| x.parse::<Instruction>().expect("Invalid input")).collect()
+        content
+            .lines()
+            .map(|x| x.parse::<Instruction>().expect("Invalid input"))
+            .collect()
     }
 }
