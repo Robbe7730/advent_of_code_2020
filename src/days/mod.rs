@@ -17,6 +17,7 @@ mod day16;
 mod day17;
 mod day18;
 mod day19;
+mod day20;
 
 use crate::day::Day;
 use std::path::PathBuf;
@@ -56,6 +57,7 @@ pub fn run_day(
         17 => day17::Day17 {}.execute(day_num, bench_num, run_part1, run_part2, input_file, timed),
         18 => day18::Day18 {}.execute(day_num, bench_num, run_part1, run_part2, input_file, timed),
         19 => day19::Day19 {}.execute(day_num, bench_num, run_part1, run_part2, input_file, timed),
+        20 => day20::Day20 {}.execute(day_num, bench_num, run_part1, run_part2, input_file, timed),
         _ => panic!("Day {} hasn't been solved (yet)", day_num),
     };
 }
