@@ -1,4 +1,5 @@
 #![feature(iterator_fold_self)]
+#![feature(linked_list_remove)]
 
 mod day;
 mod days;
