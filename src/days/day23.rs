@@ -1,8 +1,5 @@
 use crate::day::Day;
 
-use std::collections::VecDeque;
-use std::time::SystemTime;
-
 pub struct Day23 {}
 
 impl Day for Day23 {
@@ -13,10 +10,11 @@ impl Day for Day23 {
     fn solve_part1(&self, input: &Vec<Self::InputElement>) -> Self::Output1 {
         let state = self.play(input, 100);
 
-        let start_pos = state.iter().position(|x| *x == 1).unwrap() + 1;
+        let mut curr_pos = state[1];
         let mut ret = 0;
-        for i in 0..8 {
-            ret = ret * 10 + state[(start_pos + i) % 9];
+        for _ in 0..8 {
+            ret = ret * 10 + curr_pos;
+            curr_pos = state[curr_pos];
         }
         ret
     }
@@ -27,10 +25,10 @@ impl Day for Day23 {
             new_input.push(i);
         }
 
-        let state = self.play(&new_input, 10_000_000);
+        let next = self.play(&new_input, 10_000_000);
 
-        let start_pos = state.iter().position(|x| *x == 1).unwrap() + 1;
-        state[(start_pos + 1) % 1_000_000] * state[(start_pos + 2) % 1_000_000]
+        // 999872003420 -> too high
+        next[1] * next[next[1]]
     }
 
     fn parse_input(&self, content: String) -> Vec<Self::InputElement> {
@@ -43,46 +41,48 @@ impl Day for Day23 {
 }
 
 impl Day23 {
-    fn play(&self, input: &Vec<usize>, num_turns: usize) -> VecDeque<usize> {
-        let mut curr_state = VecDeque::from(input.clone());
-        let cup_count = 9;
-        let mut last_time = SystemTime::now();
+    fn play(&self, input: &Vec<usize>, num_turns: usize) -> Vec<usize> {
+        let cup_count = input.len();
 
-        for turn in 0..num_turns {
-            if turn % (num_turns / 100) == 0 {
-                println!(
-                    "{}% complete, took {} ms",
-                    turn / (num_turns / 100),
-                    last_time.elapsed().unwrap().as_millis()
-                );
-                last_time = SystemTime::now();
-            }
+        let mut next: Vec<usize> = vec![0; cup_count + 1];
 
-            // Find destination cup (part 1)
-            let mut dest_cup_label = curr_state[0] - 1; // O(1)
-
-            // Rotate
-            curr_state.rotate_left(1); // O(1)
-
-            // Pick up three cups
-            let first_cup = curr_state.pop_front().unwrap(); // O(1)
-            let second_cup = curr_state.pop_front().unwrap(); // O(1)
-            let third_cup = curr_state.pop_front().unwrap(); // O(1)
-
-            // Find destination cup (part 2)
-            let mut dest_pos_opt = curr_state.iter().position(|x| *x == dest_cup_label); // O(n)
-            while dest_pos_opt == None {
-                dest_cup_label = (dest_cup_label + cup_count) % (cup_count + 1); // O(1)
-                dest_pos_opt = curr_state.iter().position(|x| *x == dest_cup_label); // O(n)
-            }
-
-            let dest_pos = dest_pos_opt.unwrap(); // O(n)
-
-            // Place cups
-            curr_state.insert((dest_pos + 1) % cup_count, third_cup); // O(n)
-            curr_state.insert((dest_pos + 1) % cup_count, second_cup); // O(n)
-            curr_state.insert((dest_pos + 1) % cup_count, first_cup); // O(n)
+        for window in input.windows(2) {
+            next[window[0]] = window[1];
         }
-        curr_state
+        next[*input.last().unwrap()] = input[0];
+
+        let mut curr_cup = input[0];
+
+        for _ in 0..num_turns {
+            // Pick up three cups
+            let first_cup = next[curr_cup];
+            let second_cup = next[first_cup];
+            let third_cup = next[second_cup];
+            next[curr_cup] = next[third_cup];
+
+            // Find the destination cup
+            let mut dest_cup;
+            if curr_cup == 1 {
+                dest_cup = cup_count;
+            } else {
+                dest_cup = curr_cup - 1;
+            }
+            while dest_cup == first_cup || dest_cup == second_cup || dest_cup == third_cup {
+                if dest_cup == 1 {
+                    dest_cup = cup_count;
+                } else {
+                    dest_cup -= 1;
+                }
+            }
+
+            // Place cups back
+            next[third_cup] = next[dest_cup];
+            next[dest_cup] = first_cup;
+
+            // Select next cup
+            curr_cup = next[curr_cup];
+        }
+
+        next
     }
 }
